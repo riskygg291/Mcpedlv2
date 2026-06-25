@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCPEDL Next-Gen</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+
+    <!-- 1. PREMIUM LOADING SCREEN (3 DETIK) -->
+    <div id="loading-screen" class="loader-overlay">
+        <div class="loader-content">
+            <div class="neon-cube">
+                <div class="cube-face front"></div>
+                <div class="cube-face back"></div>
+                <div class="cube-face left"></div>
+                <div class="cube-face right"></div>
+                <div class="cube-face top"></div>
+                <div class="cube-face bottom"></div>
+            </div>
+            <h2 class="loader-text">INITIALIZING MCPEDL<span>X</span></h2>
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">MCPEDL<span>X</span></a>
+            
+            <div class="nav-right">
+                <!-- Settings Button -->
+                <button class="icon-btn" onclick="toggleSettings()" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <!-- Auth Zone -->
+                <div id="auth-zone">
+                    <button class="btn-google" id="btnLogin"><i class="fab fa-google"></i> <span data-key="login">Login with Google</span></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SETTINGS PANEL (TEMA & BAHASA) -->
+    <div class="settings-panel" id="settingsPanel">
+        <h4 data-key="settingsTitle">Pengaturan Sistem</h4>
+        <hr>
+        <div class="setting-item">
+            <span data-key="themeLabel">Tema Tampilan</span>
+            <button class="toggle-control" onclick="toggleTheme()" id="themeBtn">🌓 Dark</button>
+        </div>
+        <div class="setting-item">
+            <span data-key="langLabel">Bahasa</span>
+            <select id="langSelect" onchange="changeLanguage(this.value)">
+                <option value="id">Bahasa Indonesia</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+        <div class="creator-tag">
+            <p>Created by: <strong>AMBATUKAM</strong></p>
+        </div>
+    </div>
+
+    <!-- HERO SECTION -->
+    <header class="hero">
+        <h1 id="heroTitle">Discover & Share <br>The Ultimate <span>Addons</span></h1>
+        <p id="heroSub">Platform komunitas generasi baru untuk membagikan kreativitas modifikasi Minecraft Anda.</p>
+        <button class="btn-primary" onclick="openModal()"><i class="fas fa-plus"></i> <span data-key="shareAddonBtn">Bagikan Addon</span></button>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="container">
+        <!-- Addon List Grid -->
+        <section class="addon-section">
+            <h2 class="section-title" data-key="trendingTitle">⚡ Trending Addons</h2>
+            <div class="addon-grid" id="addonGrid">
+                <!-- Data dari Firebase akan mendarat di sini secara otomatis -->
+            </div>
+        </section>
+
+        <!-- COMMENT SECTION (NYATA & GLOBAL) -->
+        <section class="comment-section">
+            <h2 class="section-title"><i class="fas fa-comments"></i> <span data-key="commentTitle">Diskusi Publik Komunitas</span></h2>
+            
+            <div class="comment-box">
+                <div id="comment-auth-status" class="auth-alert">
+                    <p data-key="loginAlert">Anda harus masuk menggunakan Google Akun untuk dapat menulis komentar secara publik.</p>
+                </div>
+                <div class="comment-input-area hidden" id="commentInputArea">
+                    <textarea id="commentText" placeholder="Berikan feedback atau tanyakan sesuatu tentang addon..."></textarea>
+                    <button class="btn-primary" onclick="sendCommentToServer()"><i class="fas fa-paper-plane"></i> <span data-key="sendComment">Kirim</span></button>
+                </div>
+            </div>
+
+            <div class="comments-list" id="commentsList">
+                <!-- Komentar dari database muncul di sini -->
+            </div>
+        </section>
+    </main>
+
+    <!-- FLOATING ACCENT BUTTON (+) -->
+    <button class="floating-btn" onclick="openModal()">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- MODAL TAMBAH ADDON (UPLOAD & LINK DOWNLOAD) -->
+    <div class="modal-overlay" id="addonModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-cloud-upload-alt"></i> <span data-key="modalTitle">Unggah Addon Baru</span></h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label data-key="labelTitle">Nama Addon</label>
+                    <input type="text" id="addonTitle" placeholder="Contoh: God Slayer Sword v1">
+                </div>
+                <div class="form-group">
+                    <label data-key="labelCategory">Kategori</label>
+                    <select id="addonCategory">
+                        <option value="Addon">Addon</option>
+                        <option value="Resource Pack">Resource Pack</option>
+                        <option value="Shaders">Shaders</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label data-key="labelLink">Link Download File Addon</label>
+                    <input type="url" id="addonLink" placeholder="https://mediafire.com/file/... atau https://drive.google.com/...">
+                </div>
+                <div class="form-group">
+                    <label data-key="labelImg">Upload Thumbnail Cover</label>
+                    <div class="file-dropzone" onclick="document.getElementById('addonFile').click()">
+                        <i class="fas fa-image"></i>
+                        <p id="file-name-preview" data-key="dropzoneText">Klik untuk memilih screenshot gambar perangkat</p>
+                        <input type="file" id="addonFile" accept="image/*" style="display:none" onchange="previewImage(event)">
+                    </div>
+                    <img id="image-preview" class="image-preview hidden">
+                </div>
+                <button class="btn-primary full-width" onclick="uploadAddonToServer()"><i class="fas fa-check"></i> <span data-key="publishBtn">Publish Addon</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE CORE SDKS & APP IMPLEMENTATION -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>
