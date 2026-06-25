@@ -1,20 +1,15 @@
-// DATABASE SIMULATOR MENGGUNAKAN LOCAL STORAGE (Data tersimpan permanen & anti error)
 let activeUser = JSON.parse(localStorage.getItem('mcpedlx_user')) || null;
 let imgBase64Data = "";
+let currentEditCommentId = null;
 
-// DATA LOCAL DEFAULT JIKA DATABASE MASIH KOSONG
-const defaultAddons = [
-    { title: "Cyber Armor V3", category: "Addon", downloadLink: "https://mediafire.com/file/cyberarmor", image: "https://images.unsplash.com/photo-1605899435973-ca2d1a8861cf?w=500", author: "AMBATUKAM" },
-    { title: "Rethought Shaders Ultra", category: "Shaders", downloadLink: "https://mediafire.com/file/shaders", image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500", author: "Steve_Craft" }
-];
-const defaultComments = [
-    { username: "Rian Gaming", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=rian", message: "Gila addon buatan AMBATUKAM kerennn parah abis!" }
-];
+// DATA BAWAN SUDAH DIKOSONGKAN TOTAL SESUAI PERMINTAAN
+const defaultAddons = [];
+const defaultComments = [];
 
 let addons = JSON.parse(localStorage.getItem('mcpedlx_addons')) || defaultAddons;
 let comments = JSON.parse(localStorage.getItem('mcpedlx_comments')) || defaultComments;
 
-// 1. ENGINE LOADING 3 DETIK
+// 1. ENGINE LOADING SCREEN
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         const loader = document.getElementById('loading-screen');
@@ -29,18 +24,18 @@ window.addEventListener('DOMContentLoaded', () => {
     renderComments();
 });
 
-// 2. GOOGLE LOGIN POPUP SYSTEM (REAL SIMULATION BYPASS)
+// 2. GOOGLE AUTH SIMULATION
 window.triggerGoogleLogin = function() {
-    // Membuat simulasi login akun Google resmi dengan jendela konfirmasi browser asli
     let confirmation = confirm("MCPEDLX ingin menggunakan akun google Anda untuk masuk ke sistem cloud community.");
     if(confirmation) {
-        // Data akun Google Ter-autentikasi
         activeUser = {
             displayName: "User_" + Math.floor(Math.random() * 8999 + 1000),
             photoURL: `https://api.dicebear.com/7.x/adventurer/svg?seed=${Math.random()}`
         };
         localStorage.setItem('mcpedlx_user', JSON.stringify(activeUser));
         checkUserSession();
+        renderAddons();
+        renderComments();
         alert("🟢 Berhasil Login menggunakan Akun Google!");
     }
 }
@@ -55,10 +50,206 @@ function checkUserSession() {
         `;
         document.getElementById('comment-auth-status').classList.add('hidden');
         document.getElementById('commentInputArea').classList.remove('hidden');
+        
+        // Load data ke panel setting
+        document.getElementById('profile-edit-zone').classList.remove('hidden');
+        document.getElementById('settings-avatar-preview').src = activeUser.photoURL;
+        document.getElementById('editDisplayName').value = activeUser.displayName;
     }
 }
 
-// 3. MULTI LANGUAGE SYSTEM (ID / EN)
+// ENGINE UPDATE NAMA PROFIL
+window.updateDisplayName = function() {
+    const newName = document.getElementById('editDisplayName').value.trim();
+    if (!newName) return alert("Nama tidak boleh kosong!");
+    
+    if (activeUser) {
+        const oldName = activeUser.displayName;
+        
+        activeUser.displayName = newName;
+        localStorage.setItem('mcpedlx_user', JSON.stringify(activeUser));
+        
+        comments.forEach(comment => {
+            if (comment.username === oldName) {
+                comment.username = newName;
+            }
+        });
+        localStorage.setItem('mcpedlx_comments', JSON.stringify(comments));
+        
+        addons.forEach(addon => {
+            if (addon.author === oldName) {
+                addon.author = newName;
+            }
+        });
+        localStorage.setItem('mcpedlx_addons', JSON.stringify(addons));
+
+        checkUserSession();
+        renderAddons();
+        renderComments();
+        alert("🎉 Nama profilmu berhasil diubah menjadi: " + newName);
+    }
+}
+
+// ENGINE UPDATE FOTO PROFIL
+window.updateProfilePicture = function(event) {
+    const file = event.target.files[0];
+    if (file && activeUser) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const newAvatarBase64 = e.target.result;
+            activeUser.photoURL = newAvatarBase64;
+            localStorage.setItem('mcpedlx_user', JSON.stringify(activeUser));
+            
+            comments.forEach(comment => {
+                if (comment.username === activeUser.displayName) {
+                    comment.avatar = newAvatarBase64;
+                }
+            });
+            localStorage.setItem('mcpedlx_comments', JSON.stringify(comments));
+            
+            checkUserSession();
+            renderComments();
+            alert("📸 Foto profil berhasil diperbarui!");
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+// 3. POST & EDIT CHAT SYSTEM
+window.sendComment = function() {
+    const text = document.getElementById('commentText').value;
+    if(!text.trim()) return alert("Komentar tidak boleh kosong!");
+
+    if (currentEditCommentId) {
+        const commentIndex = comments.findIndex(c => c.id === currentEditCommentId);
+        if (commentIndex !== -1) {
+            comments[commentIndex].message = text;
+            alert("📝 Komentar berhasil diubah!");
+        }
+        currentEditCommentId = null;
+        document.getElementById('submitCommentBtn').innerHTML = `<i class="fas fa-paper-plane"></i> <span data-key="sendComment">Kirim</span>`;
+    } else {
+        comments.unshift({
+            id: "comment_" + Date.now(),
+            username: activeUser ? activeUser.displayName : "Guest",
+            avatar: activeUser ? activeUser.photoURL : "https://api.dicebear.com/7.x/bottts/svg?seed=guest",
+            message: text
+        });
+    }
+
+    localStorage.setItem('mcpedlx_comments', JSON.stringify(comments));
+    renderComments();
+    document.getElementById('commentText').value = "";
+}
+
+window.startEditComment = function(id) {
+    const targetComment = comments.find(c => c.id === id);
+    if (targetComment) {
+        document.getElementById('commentText').value = targetComment.message;
+        document.getElementById('commentText').focus();
+        currentEditCommentId = id;
+        document.getElementById('submitCommentBtn').innerHTML = `<i class="fas fa-edit"></i> Simpan Perubahan`;
+    }
+}
+
+window.deleteComment = function(id) {
+    if(confirm("Hapus komentar ini secara permanen?")) {
+        comments = comments.filter(c => c.id !== id);
+        localStorage.setItem('mcpedlx_comments', JSON.stringify(comments));
+        renderComments();
+    }
+}
+
+// 4. PUBLISH & DELETE ADDON SYSTEM
+window.uploadAddon = function() {
+    const title = document.getElementById('addonTitle').value;
+    const category = document.getElementById('addonCategory').value;
+    const link = document.getElementById('addonLink').value;
+
+    if(!title || !link || !imgBase64Data) {
+        alert("Lengkapi semua kolom formulir beserta Gambar dari Perangkat!");
+        return;
+    }
+
+    addons.unshift({
+        id: "addon_" + Date.now(),
+        title: title,
+        category: category,
+        downloadLink: link,
+        image: imgBase64Data,
+        author: activeUser ? activeUser.displayName : "Guest"
+    });
+
+    localStorage.setItem('mcpedlx_addons', JSON.stringify(addons));
+    renderAddons();
+    closeModal();
+    alert("🔥 Sukses! Addon komunitas baru buatanmu sudah berhasil dipublish!");
+}
+
+window.deleteAddon = function(id) {
+    if(confirm("Apakah kamu yakin ingin menghapus addon ini dari daftar website?")) {
+        addons = addons.filter(item => item.id !== id);
+        localStorage.setItem('mcpedlx_addons', JSON.stringify(addons));
+        renderAddons();
+        alert("🗑️ Addon telah berhasil dihapus!");
+    }
+}
+
+// 5. RENDERING CORE ENGINE
+function renderAddons() {
+    const grid = document.getElementById('addonGrid');
+    grid.innerHTML = "";
+    addons.forEach(item => {
+        const currentUser = activeUser ? activeUser.displayName : "";
+        const showDeleteBtn = (item.author === currentUser || currentUser === "");
+
+        const card = document.createElement('div');
+        card.className = 'addon-card';
+        card.innerHTML = `
+            ${showDeleteBtn ? `<button class="btn-delete-addon" onclick="deleteAddon('${item.id}')" title="Hapus Addon"><i class="fas fa-trash-alt"></i></button>` : ''}
+            <img src="${item.image}" class="addon-img">
+            <div class="addon-info">
+                <div>
+                    <span class="card-badge">${item.category}</span>
+                    <h3>${item.title}</h3>
+                    <p class="meta">By ${item.author}</p>
+                </div>
+                <button class="btn-copy" onclick="copyDownloadLink('${item.downloadLink}')">
+                    <i class="fas fa-copy"></i> Copy Download Link
+                </button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function renderComments() {
+    const list = document.getElementById('commentsList');
+    list.innerHTML = "";
+    comments.forEach(item => {
+        const currentUser = activeUser ? activeUser.displayName : "";
+        const isMyComment = (item.username === currentUser);
+
+        const card = document.createElement('div');
+        card.className = 'comment-card';
+        card.innerHTML = `
+            <img src="${item.avatar}" class="comment-avatar">
+            <div class="comment-main">
+                <h4>${item.username} <span class="google-tag"><i class="fab fa-google"></i> Verified</span></h4>
+                <p>${item.message}</p>
+            </div>
+            ${isMyComment ? `
+                <div class="comment-actions">
+                    <button class="btn-action-mini" onclick="startEditComment('${item.id}')" title="Edit Teks"><i class="fas fa-edit"></i></button>
+                    <button class="btn-action-mini delete" onclick="deleteComment('${item.id}')" title="Hapus Chat"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            ` : ''}
+        `;
+        list.appendChild(card);
+    });
+}
+
+// 6. GENERAL SYSTEM SETUP
 const languages = {
     id: {
         settingsTitle: "Pengaturan Sistem", themeLabel: "Tema Tampilan", langLabel: "Bahasa",
@@ -90,7 +281,6 @@ window.changeLanguage = function(lang) {
     document.getElementById('heroSub').innerText = data.heroSub;
 }
 
-// 4. THEME CONTROLLER
 window.toggleTheme = function() {
     const body = document.body;
     const btn = document.getElementById('themeBtn');
@@ -108,88 +298,6 @@ window.toggleSettings = function() {
     panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
 }
 
-// 5. POST COMMENT & UPLOAD ADDON SYSTEM
-window.sendComment = function() {
-    const text = document.getElementById('commentText').value;
-    if(!text.trim()) return alert("Komentar tidak boleh kosong!");
-
-    comments.unshift({
-        username: activeUser.displayName,
-        avatar: activeUser.photoURL,
-        message: text
-    });
-
-    localStorage.setItem('mcpedlx_comments', JSON.stringify(comments));
-    renderComments();
-    document.getElementById('commentText').value = "";
-}
-
-window.uploadAddon = function() {
-    const title = document.getElementById('addonTitle').value;
-    const category = document.getElementById('addonCategory').value;
-    const link = document.getElementById('addonLink').value;
-
-    if(!title || !link || !imgBase64Data) {
-        alert("Lengkapi semua kolom formulir beserta Gambar dari Perangkat!");
-        return;
-    }
-
-    addons.unshift({
-        title: title,
-        category: category,
-        downloadLink: link,
-        image: imgBase64Data,
-        author: activeUser ? activeUser.displayName : "AMBATUKAM"
-    });
-
-    localStorage.setItem('mcpedlx_addons', JSON.stringify(addons));
-    renderAddons();
-    closeModal();
-    alert("🔥 Sukses! Addon komunitas baru buatanmu sudah berhasil dipublish!");
-}
-
-// 6. RENDER DATA TO UI
-function renderAddons() {
-    const grid = document.getElementById('addonGrid');
-    grid.innerHTML = "";
-    addons.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'addon-card';
-        card.innerHTML = `
-            <img src="${item.image}" class="addon-img">
-            <div class="addon-info">
-                <div>
-                    <span class="card-badge">${item.category}</span>
-                    <h3>${item.title}</h3>
-                    <p class="meta">By ${item.author}</p>
-                </div>
-                <button class="btn-copy" onclick="copyDownloadLink('${item.downloadLink}')">
-                    <i class="fas fa-copy"></i> Copy Download Link
-                </button>
-            </div>
-        `;
-        grid.appendChild(card);
-    });
-}
-
-function renderComments() {
-    const list = document.getElementById('commentsList');
-    list.innerHTML = "";
-    comments.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'comment-card';
-        card.innerHTML = `
-            <img src="${item.avatar}" class="comment-avatar">
-            <div class="comment-main">
-                <h4>${item.username} <span class="google-tag"><i class="fab fa-google"></i> Verified</span></h4>
-                <p>${item.message}</p>
-            </div>
-        `;
-        list.appendChild(card);
-    });
-}
-
-// 7. COPY TO CLIPBOARD LINK FUNCTION
 window.copyDownloadLink = function(link) {
     navigator.clipboard.writeText(link).then(() => {
         alert("📋 Tautan Unduhan Addon berhasil disalin ke Papan Klip!");
@@ -198,7 +306,6 @@ window.copyDownloadLink = function(link) {
     });
 }
 
-// 8. FILE DIALOG & MODAL CONTROLLER
 window.openModal = function() { document.getElementById('addonModal').style.display = 'flex'; }
 window.closeModal = function() { document.getElementById('addonModal').style.display = 'none'; resetForm(); }
 
@@ -211,7 +318,7 @@ window.previewImage = function(event) {
             const img = document.getElementById('image-preview');
             img.src = e.target.result;
             img.classList.remove('hidden');
-            imgBase64Data = e.target.result; // Data gambar tersimpan sempurna
+            imgBase64Data = e.target.result;
         }
         reader.readAsDataURL(file);
     }
@@ -224,3 +331,4 @@ function resetForm() {
     document.getElementById('image-preview').classList.add('hidden');
     imgBase64Data = "";
 }
+
