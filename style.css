@@ -25,7 +25,7 @@ body { background: var(--bg-base); color: var(--text-primary); overflow-x: hidde
 .hidden { display: none !important; }
 .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-/* 3D CUBE LOADING SCREEN (1000x BETTER) */
+/* 3D CUBE LOADING SCREEN */
 .loader-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: #060913; z-index: 9999; display: flex; justify-content: center; align-items: center;
@@ -75,6 +75,32 @@ body { background: var(--bg-base); color: var(--text-primary); overflow-x: hidde
 .toggle-control { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); padding: 6px 12px; border-radius: 8px; cursor: pointer; }
 .creator-tag { text-align: center; margin-top: 10px; font-size: 12px; color: var(--text-secondary); border-top: 1px solid var(--border-color); padding-top: 10px; }
 
+/* PROFILE AVATAR UPLOADER */
+.profile-uploader-wrapper {
+    position: relative; width: 70px; height: 70px; margin: 0 auto 12px auto;
+}
+.profile-uploader-wrapper img {
+    width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent);
+}
+.btn-change-avatar {
+    position: absolute; bottom: 0; right: 0; background: var(--accent); color: #000;
+    border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 10px;
+}
+
+/* BAR INPUT EDIT NAMA */
+.name-edit-group {
+    display: flex; gap: 8px; margin-bottom: 12px;
+}
+.name-edit-group input {
+    flex: 1; background: var(--bg-card); border: 1px solid var(--border-color);
+    color: var(--text-primary); border-radius: 8px; padding: 6px 10px; font-size: 13px;
+}
+.name-edit-group input:focus { outline: none; border-color: var(--accent); }
+.name-edit-group button {
+    background: var(--accent); color: #000; border: none; padding: 0 12px; border-radius: 8px; cursor: pointer; font-size: 12px;
+}
+
 /* HERO DESIGN */
 .hero { text-align: center; padding: 90px 20px 50px 20px; }
 .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 50px; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
@@ -90,12 +116,12 @@ body { background: var(--bg-base); color: var(--text-primary); overflow-x: hidde
 .btn-copy:hover { background: var(--accent); color: #000; }
 
 .user-profile-nav { display: flex; align-items: center; gap: 10px; background: var(--bg-surface); padding: 5px 15px 5px 5px; border-radius: 30px; border: 1px solid var(--border-color); }
-.user-profile-nav img { width: 32px; height: 32px; border-radius: 50%; }
+.user-profile-nav img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
 
 /* GRID SYSTEMS */
 .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 24px; margin-bottom: 25px; border-left: 4px solid var(--accent); padding-left: 12px; }
 .addon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; margin-bottom: 60px; }
-.addon-card { background: var(--bg-surface); border-radius: 20px; overflow: hidden; border: 1px solid var(--border-color); display: flex; flex-direction: column; transition: 0.3s; }
+.addon-card { background: var(--bg-surface); border-radius: 20px; overflow: hidden; border: 1px solid var(--border-color); display: flex; flex-direction: column; transition: 0.3s; position: relative; }
 .addon-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 30px var(--accent-glow); }
 .addon-img { width: 100%; height: 210px; object-fit: cover; background: #222; }
 .addon-info { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
@@ -103,7 +129,15 @@ body { background: var(--bg-base); color: var(--text-primary); overflow-x: hidde
 .addon-info h3 { font-size: 18px; margin-bottom: 5px; }
 .addon-info .meta { font-size: 13px; color: var(--text-secondary); }
 
-/* COMMENTS CARD */
+.btn-delete-addon {
+    position: absolute; top: 15px; right: 15px; background: rgba(239, 68, 68, 0.85);
+    color: #fff; border: none; width: 35px; height: 35px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: 0.2s; font-size: 14px; backdrop-filter: blur(4px); z-index: 10;
+}
+.btn-delete-addon:hover { background: #ef4444; transform: scale(1.1); }
+
+/* COMMENTS CARD & MANAGEMENT */
 .comment-section { background: var(--bg-surface); padding: 35px; border-radius: 24px; border: 1px solid var(--border-color); }
 .auth-alert { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); padding: 15px; border-radius: 12px; color: #ef4444; font-size: 14px; text-align: center; font-weight: 600; }
 .comment-user-header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
@@ -112,11 +146,17 @@ textarea { width: 100%; height: 110px; background: var(--bg-card); border: 1px s
 textarea:focus { outline: none; border-color: var(--accent); }
 
 .comments-list { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; }
-.comment-card { display: flex; gap: 15px; background: var(--bg-card); padding: 20px; border-radius: 16px; border: 1px solid var(--border-color); }
-.comment-avatar { width: 45px; height: 45px; border-radius: 50%; }
+.comment-card { display: flex; gap: 15px; background: var(--bg-card); padding: 20px; border-radius: 16px; border: 1px solid var(--border-color); position: relative; }
+.comment-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+.comment-main { flex: 1; }
 .comment-main h4 { font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
 .google-tag { background: #4285F4; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
 .comment-main p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+.comment-actions { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; }
+.btn-action-mini { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 13px; transition: 0.2s; padding: 4px; }
+.btn-action-mini:hover { color: var(--accent); }
+.btn-action-mini.delete:hover { color: #ef4444; }
 
 /* LAYOUT ATOMS */
 .floating-btn { position: fixed; bottom: 35px; right: 35px; width: 60px; height: 60px; border-radius: 50%; background: var(--accent); color: #000; border: none; font-size: 22px; cursor: pointer; box-shadow: 0 5px 20px var(--accent-glow); z-index: 800; transition: 0.3s; }
@@ -132,3 +172,4 @@ textarea:focus { outline: none; border-color: var(--accent); }
 .file-dropzone { border: 2px dashed var(--accent); padding: 25px; text-align: center; border-radius: 12px; cursor: pointer; background: rgba(0,240,255,0.01); }
 .file-dropzone i { font-size: 28px; color: var(--accent); margin-bottom: 8px; }
 .image-preview { width: 100%; max-height: 160px; object-fit: cover; border-radius: 10px; margin-top: 15px; }
+
