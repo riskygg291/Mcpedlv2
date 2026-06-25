@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCPEDL 1000x Cooler</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">MC<span>PEDL</span></a>
+            <div class="nav-auth" id="auth-zone">
+                <button class="btn-google" onclick="loginSimulate()"><i class="fab fa-google"></i> Login with Google</button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>Discover & Share <br>The Next-Gen <span>Addons</span></h1>
+        <p>Platform komunitas terbaik untuk mengunduh dan membagikan modifikasi Minecraft Core.</p>
+        <button class="btn-primary" onclick="openModal()"><i class="fas fa-plus"></i> Share Your Addon</button>
+    </header>
+
+    <main class="container">
+        <section class="addon-section">
+            <h2 class="section-title">Trending Community Addons</h2>
+            <div class="addon-grid" id="addonGrid">
+                <div class="addon-card">
+                    <img src="https://images.unsplash.com/photo-1605899435973-ca2d1a8861cf?w=500" alt="Addon Image" class="addon-img">
+                    <div class="addon-info">
+                        <span class="badge">Shader</span>
+                        <h3>Ultra Cyberpunk Shader v2.0</h3>
+                        <p class="author">By MasterCrafter</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="comment-section">
+            <h2 class="section-title"><i class="fas fa-comments"></i> Community Discussion</h2>
+            <div class="comment-box">
+                <div class="user-status" id="comment-auth-status">
+                    <p class="not-logged-in">Silahkan login dengan Google terlebih dahulu untuk berkomentar.</p>
+                </div>
+                <div class="comment-input-area hidden" id="commentInputArea">
+                    <textarea id="commentText" placeholder="Tulis komentar atau feedback kamu di sini..."></textarea>
+                    <button class="btn-primary" onclick="postComment()">Kirim Komentar</button>
+                </div>
+            </div>
+
+            <div class="comments-list" id="commentsList">
+                <div class="comment-card">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Alex" class="comment-avatar">
+                    <div class="comment-content">
+                        <h4>Alex J. <span class="google-badge"><i class="fab fa-google"></i> Verified</span></h4>
+                        <p>Gila, shader-nya smooth banget di HP kentang gw! Naikkan terus performanya gan!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <button class="floating-btn" onclick="openModal()" title="Tambah Addon Baru">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <div class="modal-overlay" id="addonModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-cubes"></i> Upload New Addon</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nama Addon</label>
+                    <input type="text" id="addonTitle" placeholder="Contoh: Naruto Craft v3">
+                </div>
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select id="addonCategory">
+                        <option value="Addon">Addon</option>
+                        <option value="Texture">Texture Pack</option>
+                        <option value="Shader">Shader</option>
+                        <option value="Map">World Map</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Upload Gambar dari Perangkat</label>
+                    <div class="file-dropzone" onclick="document.getElementById('addonFile').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p id="file-name-preview">Klik untuk memilih gambar addon</p>
+                        <input type="file" id="addonFile" accept="image/*" style="display:none" onchange="previewImage(event)">
+                    </div>
+                    <img id="image-preview" class="image-preview hidden" src="" alt="Preview">
+                </div>
+                <button class="btn-primary full-width" onclick="submitAddon()">Publish Addon</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
