@@ -3,150 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCPEDLX - Next Gen</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>MCPEDLV2</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="dark-theme">
+<body class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white min-h-screen font-sans">
 
-    <div id="loading-screen" class="loader-overlay">
-        <div class="loader-content">
-            <div class="neon-cube">
-                <div class="cube-face front"></div>
-                <div class="cube-face back"></div>
-                <div class="cube-face left"></div>
-                <div class="cube-face right"></div>
-                <div class="cube-face top"></div>
-                <div class="cube-face bottom"></div>
-            </div>
-            <h2 class="loader-text">INITIALIZING MCPEDL<span>X</span></h2>
-            <div class="progress-bar"><div class="progress-fill"></div></div>
+    <div id="loading-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-500">
+        <div class="relative flex items-center justify-center">
+            <div class="w-24 h-24 rounded-full border-4 border-t-emerald-500 border-r-transparent border-b-indigo-500 border-l-transparent animate-spin"></div>
+            <div class="absolute text-xl font-black tracking-widest text-emerald-400">M2</div>
         </div>
+        <h1 class="mt-6 text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-400 animate-pulse">MCPEDLV2</h1>
+        <p class="text-xs text-slate-500 mt-2 tracking-widest uppercase">Loading Awesomeness...</p>
     </div>
 
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="#" class="logo">MCPEDL<span>X</span></a>
-            
-            <div class="nav-right">
-                <button class="icon-btn" onclick="toggleSettings()" title="Settings">
-                    <i class="fas fa-cog"></i>
-                </button>
-                <div id="auth-zone">
-                    <button class="btn-google" onclick="triggerGoogleLogin()"><i class="fab fa-google"></i> <span data-key="login">Login with Google</span></button>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="settings-panel" id="settingsPanel">
-        <h4 data-key="settingsTitle">Pengaturan Sistem</h4>
-        <hr>
+    <div id="main-app" class="hidden opacity-0 transition-opacity duration-700">
         
-        <div id="profile-edit-zone" class="hidden">
-            <span style="font-size: 11px; color: var(--text-secondary); display:block; margin-bottom:8px; text-align:center;">Edit Profil Akun</span>
-            <div class="profile-uploader-wrapper">
-                <img id="settings-avatar-preview" src="" alt="Avatar">
-                <button class="btn-change-avatar" onclick="document.getElementById('avatarFile').click()">
-                    <i class="fas fa-camera"></i>
-                </button>
-                <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="updateProfilePicture(event)">
+        <nav class="backdrop-blur-md bg-slate-900/80 sticky top-0 z-40 border-b border-slate-800 px-4 py-3 sm:px-8 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-emerald-500 to-indigo-600 p-2 rounded-xl shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-cubes text-xl"></i>
+                </div>
+                <span class="text-2xl font-black tracking-wider bg-gradient-to-r from-emerald-400 to-indigo-400 text-transparent bg-clip-text">MCPEDLV2</span>
             </div>
             
-            <div class="name-edit-group">
-                <input type="text" id="editDisplayName" placeholder="Masukkan nama barumu...">
-                <button onclick="updateDisplayName()" title="Simpan Nama"><i class="fas fa-save"></i></button>
+            <div class="flex items-center gap-4">
+                <select id="lang-select" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-emerald-500">
+                    <option value="id">🇮🇩 ID</option>
+                    <option value="en">🇺🇸 EN</option>
+                </select>
+                
+                <button id="profile-btn" class="flex items-center gap-2 bg-slate-800/80 hover:bg-slate-700 px-3 py-1.5 rounded-full border border-slate-700 transition">
+                    <img id="nav-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Ambatukan" alt="Avatar" class="w-7 h-7 rounded-full object-cover border border-emerald-400">
+                    <span id="nav-username" class="text-sm font-medium hidden sm:inline">User</span>
+                </button>
             </div>
-            <hr>
-        </div>
+        </nav>
 
-        <div class="setting-item">
-            <span data-key="themeLabel">Tema Tampilan</span>
-            <button class="toggle-control" onclick="toggleTheme()" id="themeBtn">🌓 Dark</button>
-        </div>
-        <div class="setting-item">
-            <span data-key="langLabel">Bahasa</span>
-            <select id="langSelect" onchange="changeLanguage(this.value)">
-                <option value="id">Bahasa Indonesia</option>
-                <option value="en">English</option>
-            </select>
-        </div>
-        <div class="creator-tag">
-            <p>Created by: <strong>AMBATUKAM</strong></p>
+        <main class="max-w-7xl mx-auto px-4 py-8 sm:px-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+            
+            <aside class="space-y-6 lg:col-span-1">
+                <div class="bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-slate-800 shadow-xl text-center relative overflow-hidden group">
+                    <div class="absolute -top-10 -right-10 w-24 h-24 bg-indigo-600/10 rounded-full blur-xl"></div>
+                    <div class="relative inline-block group">
+                        <img id="card-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Ambatukan" alt="Profile" class="w-24 h-24 rounded-2xl mx-auto object-cover border-2 border-indigo-500 p-1 bg-slate-950 shadow-lg transition-transform group-hover:scale-105">
+                        <label for="avatar-input" class="absolute bottom-1 right-1 bg-emerald-500 hover:bg-emerald-600 text-slate-950 p-2 rounded-xl cursor-pointer shadow-md shadow-emerald-500/30 transition-transform hover:scale-110">
+                            <i class="fa-solid fa-camera text-xs"></i>
+                        </label>
+                        <input type="file" id="avatar-input" accept="image/*" class="hidden">
+                    </div>
+                    
+                    <div class="mt-4">
+                        <div class="flex items-center justify-center gap-2">
+                            <input type="text" id="username-input" value="User" class="bg-transparent text-center font-bold text-xl border-b border-transparent hover:border-slate-600 focus:border-emerald-500 focus:outline-none px-2 py-0.5 rounded transition w-full">
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1" id="text-creator-label">Pembuat / Creator</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/40 backdrop-blur-md p-5 rounded-2xl border border-slate-800/80 text-sm space-y-3">
+                    <h3 class="font-bold text-slate-400 uppercase text-xs tracking-wider mb-2" id="text-info-title">Informasi Project</h3>
+                    <div class="flex justify-between border-b border-slate-800 pb-2">
+                        <span class="text-slate-400" id="text-author">Nama Pembuat:</span>
+                        <span class="font-bold text-emerald-400">AMBATUKAN</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Version:</span>
+                        <span class="font-mono text-indigo-400">v2.0.0-PRO</span>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="lg:col-span-3 space-y-6">
+                <div class="flex justify-between items-center bg-slate-900/20 p-4 rounded-2xl border border-slate-800/40">
+                    <div>
+                        <h2 class="text-2xl font-black tracking-tight" id="text-explore">Jelajahi Addon</h2>
+                        <p class="text-xs text-slate-400" id="text-subtitle">Kreasi terbaik dari komunitas</p>
+                    </div>
+                    <button id="open-create-modal" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-950 font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 flex items-center gap-2 transition transform active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-plus text-sm"></i>
+                        <span class="hidden sm:inline" id="text-create-btn">Buat Addon</span>
+                    </button>
+                </div>
+
+                <div id="addons-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="create-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-6 relative shadow-2xl scale-95 opacity-0 transition-all duration-300 transform" id="create-modal-card">
+            <button id="close-create-modal" class="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 p-2 rounded-xl transition"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-xl font-black mb-4 flex items-center gap-2 text-emerald-400">
+                <i class="fa-solid fa-square-plus"></i> <span id="text-modal-title">Buat Addon Baru</span>
+            </h3>
+            
+            <form id="addon-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1" id="text-label-title">Nama Addon</label>
+                    <input type="text" id="addon-title" required class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-2.5 transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1" id="text-label-desc">Deskripsi</label>
+                    <textarea id="addon-desc" rows="3" required class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-2.5 transition resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1" id="text-label-link">Custom Link (Download/Info)</label>
+                    <input type="url" id="addon-link" placeholder="https://..." required class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-2.5 transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1" id="text-label-img">Gambar Addon</label>
+                    <div class="flex items-center justify-center w-full">
+                        <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-800 border-dashed rounded-xl cursor-pointer bg-slate-950 hover:bg-slate-900 transition focus-within:border-emerald-500">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6 text-slate-400">
+                                <i class="fa-solid fa-cloud-arrow-up text-2xl mb-2 text-indigo-400"></i>
+                                <p class="text-sm" id="text-upload-prompt">Klik untuk upload foto perangkat</p>
+                            </div>
+                            <input type="file" id="addon-img-input" accept="image/*" required class="hidden">
+                        </label>
+                    </div>
+                    <div id="img-preview" class="mt-2 hidden text-xs text-emerald-400 items-center gap-2">
+                        <i class="fa-solid fa-circle-check"></i> <span id="text-img-ready">Gambar siap!</span>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-indigo-600 hover:from-emerald-600 hover:to-indigo-700 text-slate-950 font-black py-3 rounded-xl shadow-lg transition transform active:scale-95 mt-2 cursor-pointer" id="text-submit-addon">PUBLIKASIKAN ADDON</button>
+            </form>
         </div>
     </div>
 
-    <header class="hero">
-        <h1 id="heroTitle">Discover & Share <br>The Ultimate <span>Addons</span></h1>
-        <p id="heroSub">Platform komunitas generasi baru untuk membagikan kreativitas modifikasi Minecraft Anda.</p>
-        <button class="btn-primary" onclick="openModal()"><i class="fas fa-plus"></i> <span data-key="shareAddonBtn">Bagikan Addon</span></button>
-    </header>
-
-    <main class="container">
-        <section class="addon-section">
-            <h2 class="section-title" data-key="trendingTitle">⚡ Trending Addons</h2>
-            <div class="addon-grid" id="addonGrid">
-                </div>
-        </section>
-
-        <section class="comment-section">
-            <h2 class="section-title"><i class="fas fa-comments"></i> <span data-key="commentTitle">Diskusi Publik Komunitas</span></h2>
+    <div id="detail-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl p-6 relative shadow-2xl scale-95 opacity-0 transition-all duration-300 my-8" id="detail-modal-card">
+            <button id="close-detail-modal" class="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 p-2 rounded-xl transition"><i class="fa-solid fa-xmark"></i></button>
             
-            <div class="comment-box">
-                <div id="comment-auth-status" class="auth-alert">
-                    <p data-key="loginAlert">Anda harus masuk menggunakan Google Akun untuk dapat menulis komentar secara publik.</p>
+            <div id="detail-content">
                 </div>
-                <div class="comment-input-area hidden" id="commentInputArea">
-                    <textarea id="commentText" placeholder="Berikan feedback atau tanyakan sesuatu tentang addon..."></textarea>
-                    <button class="btn-primary" id="submitCommentBtn" onclick="sendComment()"><i class="fas fa-paper-plane"></i> <span data-key="sendComment">Kirim</span></button>
-                </div>
-            </div>
-
-            <div class="comments-list" id="commentsList">
-                </div>
-        </section>
-    </main>
-
-    <button class="floating-btn" onclick="openModal()">
-        <i class="fas fa-plus"></i>
-    </button>
-
-    <div class="modal-overlay" id="addonModal">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h3><i class="fas fa-cloud-upload-alt"></i> <span data-key="modalTitle">Unggah Addon Baru</span></h3>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label data-key="labelTitle">Nama Addon</label>
-                    <input type="text" id="addonTitle" placeholder="Contoh: God Slayer Sword v1">
-                </div>
-                <div class="form-group">
-                    <label data-key="labelCategory">Kategori</label>
-                    <select id="addonCategory">
-                        <option value="Addon">Addon</option>
-                        <option value="Resource Pack">Resource Pack</option>
-                        <option value="Shaders">Shaders</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label data-key="labelLink">Link Download File Addon</label>
-                    <input type="url" id="addonLink" placeholder="https://mediafire.com/file/... atau Mega/Drive">
-                </div>
-                <div class="form-group">
-                    <label data-key="labelImg">Upload Thumbnail Cover</label>
-                    <div class="file-dropzone" onclick="document.getElementById('addonFile').click()">
-                        <i class="fas fa-image"></i>
-                        <p id="file-name-preview" data-key="dropzoneText">Klik untuk memilih screenshot gambar perangkat</p>
-                        <input type="file" id="addonFile" accept="image/*" style="display:none" onchange="previewImage(event)">
-                    </div>
-                    <img id="image-preview" class="image-preview hidden">
-                </div>
-                <button class="btn-primary full-width" onclick="uploadAddon()"><i class="fas fa-check"></i> <span data-key="publishBtn">Publish Addon</span></button>
-            </div>
         </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 bg-slate-900 border border-emerald-500/30 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 transition-all duration-300">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toast-msg" class="text-sm font-medium">Aksi Berhasil!</span>
     </div>
 
     <script src="script.js"></script>
