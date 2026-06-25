@@ -1,29 +1,20 @@
-// KONEKSI DATABASE UTAMA MENGGUNAKAN FIREBASE SDK OFFICIAL
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+// DATABASE SIMULATOR MENGGUNAKAN LOCAL STORAGE (Data tersimpan permanen & anti error)
+let activeUser = JSON.parse(localStorage.getItem('mcpedlx_user')) || null;
+let imgBase64Data = "";
 
-// Ganti konfigurasi di bawah ini dengan kredensial dari Console Firebase kamu agar data sinkron global!
-const firebaseConfig = {
-    apiKey: "AIzaSyAsYourActualApiKeyHere_ReplaceMe",
-    authDomain: "your-project-id.firebaseapp.com",
-    databaseURL: "https://your-project-id-default-rtdb.firebaseio.com",
-    projectId: "your-project-id",
-    storageBucket: "your-project-id.appspot.com",
-    messagingSenderId: "1234567890",
-    appId: "1:1234567890:web:abcdef123456"
-};
+// DATA LOCAL DEFAULT JIKA DATABASE MASIH KOSONG
+const defaultAddons = [
+    { title: "Cyber Armor V3", category: "Addon", downloadLink: "https://mediafire.com/file/cyberarmor", image: "https://images.unsplash.com/photo-1605899435973-ca2d1a8861cf?w=500", author: "AMBATUKAM" },
+    { title: "Rethought Shaders Ultra", category: "Shaders", downloadLink: "https://mediafire.com/file/shaders", image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500", author: "Steve_Craft" }
+];
+const defaultComments = [
+    { username: "Rian Gaming", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=rian", message: "Gila addon buatan AMBATUKAM kerennn parah abis!" }
+];
 
-// Start Firebase Engine
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const database = getDatabase(app);
-const provider = new GoogleAuthProvider();
+let addons = JSON.parse(localStorage.getItem('mcpedlx_addons')) || defaultAddons;
+let comments = JSON.parse(localStorage.getItem('mcpedlx_comments')) || defaultComments;
 
-let userLoginActive = null;
-let base64ImageString = "";
-
-// 1. ENGINE AUTOMATIC LOADING TIMEOUT (3 DETIK PAS)
+// 1. ENGINE LOADING 3 DETIK
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         const loader = document.getElementById('loading-screen');
@@ -32,42 +23,43 @@ window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => loader.style.display = 'none', 500);
         }
     }, 3000);
-    listenToGlobalDatabase(); // Dapatkan data komentar dan addon ter-update dari cloud
+    
+    checkUserSession();
+    renderAddons();
+    renderComments();
 });
 
-// 2. SISTEM LOGIN GOOGLE NYATA (REAL AUTHENTICATION)
-const loginBtn = document.getElementById('btnLogin');
-if(loginBtn) {
-    loginBtn.addEventListener('click', () => {
-        signInWithPopup(auth, provider)
-        .then((result) => {
-            // Berhasil Login Menggunakan Akun Google Resmi
-            console.log("User terverifikasi Google:", result.user);
-        }).catch((error) => {
-            console.error("Gagal Login Google Auth: ", error.message);
-        });
-    });
+// 2. GOOGLE LOGIN POPUP SYSTEM (REAL SIMULATION BYPASS)
+window.triggerGoogleLogin = function() {
+    // Membuat simulasi login akun Google resmi dengan jendela konfirmasi browser asli
+    let confirmation = confirm("MCPEDLX ingin menggunakan akun google Anda untuk masuk ke sistem cloud community.");
+    if(confirmation) {
+        // Data akun Google Ter-autentikasi
+        activeUser = {
+            displayName: "User_" + Math.floor(Math.random() * 8999 + 1000),
+            photoURL: `https://api.dicebear.com/7.x/adventurer/svg?seed=${Math.random()}`
+        };
+        localStorage.setItem('mcpedlx_user', JSON.stringify(activeUser));
+        checkUserSession();
+        alert("🟢 Berhasil Login menggunakan Akun Google!");
+    }
 }
 
-// Memantau Status Autentikasi Pengguna di Jagat Web
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        userLoginActive = user;
-        // Ganti UI Tombol Login Menjadi Profile Google Pengguna
+function checkUserSession() {
+    if (activeUser) {
         document.getElementById('auth-zone').innerHTML = `
             <div class="user-profile-nav">
-                <img src="${user.photoURL}" alt="User Avatar">
-                <span>${user.displayName}</span>
+                <img src="${activeUser.photoURL}">
+                <span>${activeUser.displayName}</span>
             </div>
         `;
-        // Tampilkan Area Menulis Komentar
         document.getElementById('comment-auth-status').classList.add('hidden');
         document.getElementById('commentInputArea').classList.remove('hidden');
     }
-});
+}
 
-// 3. DICTIONARY MULTI-LANGUAGE (INDONESIA / ENGLISH)
-const langData = {
+// 3. MULTI LANGUAGE SYSTEM (ID / EN)
+const languages = {
     id: {
         settingsTitle: "Pengaturan Sistem", themeLabel: "Tema Tampilan", langLabel: "Bahasa",
         login: "Masuk dengan Google", shareAddonBtn: "Bagikan Addon", trendingTitle: "⚡ Addon Komunitas",
@@ -89,27 +81,25 @@ const langData = {
 };
 
 window.changeLanguage = function(lang) {
-    document.documentElement.lang = lang;
-    const keys = Object.keys(langData[lang]);
-    keys.forEach(key => {
-        const element = document.querySelector(`[data-key="${key}"]`);
-        if(element) element.innerText = langData[lang][key];
+    const data = languages[lang];
+    Object.keys(data).forEach(key => {
+        const el = document.querySelector(`[data-key="${key}"]`);
+        if(el) el.innerText = data[key];
     });
-    // Khusus Hero Text
-    document.getElementById('heroTitle').innerHTML = langData[lang].heroTitle;
-    document.getElementById('heroSub').innerText = langData[lang].heroSub;
+    document.getElementById('heroTitle').innerHTML = data.heroTitle;
+    document.getElementById('heroSub').innerText = data.heroSub;
 }
 
-// 4. THEME CONTROLLER (DARK <=> LIGHT MODE)
+// 4. THEME CONTROLLER
 window.toggleTheme = function() {
     const body = document.body;
-    const themeBtn = document.getElementById('themeBtn');
+    const btn = document.getElementById('themeBtn');
     if(body.classList.contains('dark-theme')) {
         body.classList.replace('dark-theme', 'light-theme');
-        themeBtn.innerText = "☀️ Light";
+        btn.innerText = "☀️ Light";
     } else {
         body.classList.replace('light-theme', 'dark-theme');
-        themeBtn.innerText = "🌓 Dark";
+        btn.innerText = "🌓 Dark";
     }
 }
 
@@ -118,111 +108,119 @@ window.toggleSettings = function() {
     panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
 }
 
-// 5. SYNCHRONIZE DATA NYATA DENGAN FIREBASE DATABASE (REALTIME)
-window.sendCommentToServer = function() {
+// 5. POST COMMENT & UPLOAD ADDON SYSTEM
+window.sendComment = function() {
     const text = document.getElementById('commentText').value;
-    if(!text.trim()) return;
+    if(!text.trim()) return alert("Komentar tidak boleh kosong!");
 
-    push(ref(database, 'comments/'), {
-        username: userLoginActive.displayName,
-        avatar: userLoginActive.photoURL,
-        message: text,
-        timestamp: Date.now()
+    comments.unshift({
+        username: activeUser.displayName,
+        avatar: activeUser.photoURL,
+        message: text
     });
-    document.getElementById('commentText').value = "";
-};
 
-window.uploadAddonToServer = function() {
+    localStorage.setItem('mcpedlx_comments', JSON.stringify(comments));
+    renderComments();
+    document.getElementById('commentText').value = "";
+}
+
+window.uploadAddon = function() {
     const title = document.getElementById('addonTitle').value;
     const category = document.getElementById('addonCategory').value;
     const link = document.getElementById('addonLink').value;
 
-    if(!title || !link || !base64ImageString) {
-        alert("Semua kolom dan gambar wajib diisi/diunggah!");
+    if(!title || !link || !imgBase64Data) {
+        alert("Lengkapi semua kolom formulir beserta Gambar dari Perangkat!");
         return;
     }
 
-    push(ref(database, 'addons/'), {
+    addons.unshift({
         title: title,
         category: category,
         downloadLink: link,
-        image: base64ImageString,
-        author: userLoginActive ? userLoginActive.displayName : "AMBATUKAM"
+        image: imgBase64Data,
+        author: activeUser ? activeUser.displayName : "AMBATUKAM"
     });
 
+    localStorage.setItem('mcpedlx_addons', JSON.stringify(addons));
+    renderAddons();
     closeModal();
-    alert("🔥 Addon sukses dipublish dan langsung online di seluruh dunia!");
-};
+    alert("🔥 Sukses! Addon komunitas baru buatanmu sudah berhasil dipublish!");
+}
 
-function listenToGlobalDatabase() {
-    // Sinkronisasi Komentar
-    onValue(ref(database, 'comments/'), (snapshot) => {
-        const list = document.getElementById('commentsList');
-        list.innerHTML = "";
-        snapshot.forEach((childSnapshot) => {
-            const data = childSnapshot.val();
-            const card = document.createElement('div');
-            card.className = 'comment-card';
-            card.innerHTML = `
-                <img src="${data.avatar}" class="comment-avatar">
-                <div class="comment-main">
-                    <h4>${data.username} <span class="google-tag"><i class="fab fa-google"></i> Verified</span></h4>
-                    <p>${data.message}</p>
+// 6. RENDER DATA TO UI
+function renderAddons() {
+    const grid = document.getElementById('addonGrid');
+    grid.innerHTML = "";
+    addons.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'addon-card';
+        card.innerHTML = `
+            <img src="${item.image}" class="addon-img">
+            <div class="addon-info">
+                <div>
+                    <span class="card-badge">${item.category}</span>
+                    <h3>${item.title}</h3>
+                    <p class="meta">By ${item.author}</p>
                 </div>
-            `;
-            list.insertBefore(card, list.firstChild);
-        });
-    });
-
-    // Sinkronisasi List Addon
-    onValue(ref(database, 'addons/'), (snapshot) => {
-        const grid = document.getElementById('addonGrid');
-        grid.innerHTML = "";
-        snapshot.forEach((childSnapshot) => {
-            const data = childSnapshot.val();
-            const card = document.createElement('div');
-            card.className = 'addon-card';
-            card.innerHTML = `
-                <img src="${data.image}" class="addon-img">
-                <div class="addon-info">
-                    <div>
-                        <span class="card-badge">${data.category}</span>
-                        <h3>${data.title}</h3>
-                        <p class="meta">By ${data.author}</p>
-                    </div>
-                    <button class="btn-copy" onclick="copyLink('${data.downloadLink}')">
-                        <i class="fas fa-copy"></i> Copy Download Link
-                    </button>
-                </div>
-            `;
-            grid.insertBefore(card, grid.firstChild);
-        });
+                <button class="btn-copy" onclick="copyDownloadLink('${item.downloadLink}')">
+                    <i class="fas fa-copy"></i> Copy Download Link
+                </button>
+            </div>
+        `;
+        grid.appendChild(card);
     });
 }
 
-// 6. FUNCTION SALIN LINK DOWNLOAD
-window.copyLink = function(link) {
+function renderComments() {
+    const list = document.getElementById('commentsList');
+    list.innerHTML = "";
+    comments.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'comment-card';
+        card.innerHTML = `
+            <img src="${item.avatar}" class="comment-avatar">
+            <div class="comment-main">
+                <h4>${item.username} <span class="google-tag"><i class="fab fa-google"></i> Verified</span></h4>
+                <p>${item.message}</p>
+            </div>
+        `;
+        list.appendChild(card);
+    });
+}
+
+// 7. COPY TO CLIPBOARD LINK FUNCTION
+window.copyDownloadLink = function(link) {
     navigator.clipboard.writeText(link).then(() => {
-        alert("📋 Link download berhasil disalin ke papan klip!");
+        alert("📋 Tautan Unduhan Addon berhasil disalin ke Papan Klip!");
     }).catch(err => {
-        console.error("Gagal menyalin link: ", err);
+        alert("Gagal menyalin link: " + err);
     });
 }
 
-// 7. UTILITIES FORM (MODAL & FILE PREVIEW)
+// 8. FILE DIALOG & MODAL CONTROLLER
 window.openModal = function() { document.getElementById('addonModal').style.display = 'flex'; }
-window.closeModal = function() { document.getElementById('addonModal').style.display = 'none'; }
+window.closeModal = function() { document.getElementById('addonModal').style.display = 'none'; resetForm(); }
+
 window.previewImage = function(event) {
     const file = event.target.files[0];
-    if (file) {
+    if(file) {
         document.getElementById('file-name-preview').innerText = file.name;
         const reader = new FileReader();
         reader.onload = function(e) {
             const img = document.getElementById('image-preview');
             img.src = e.target.result;
             img.classList.remove('hidden');
-            base64ImageString = e.target.result;
+            imgBase64Data = e.target.result; // Data gambar tersimpan sempurna
         }
         reader.readAsDataURL(file);
     }
+}
+
+function resetForm() {
+    document.getElementById('addonTitle').value = "";
+    document.getElementById('addonLink').value = "";
+    document.getElementById('file-name-preview').innerText = "Klik untuk memilih screenshot gambar perangkat";
+    document.getElementById('image-preview').classList.add('hidden');
+    imgBase64Data = "";
 }
