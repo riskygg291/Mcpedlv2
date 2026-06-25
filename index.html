@@ -43,6 +43,24 @@
     <div class="settings-panel" id="settingsPanel">
         <h4 data-key="settingsTitle">Pengaturan Sistem</h4>
         <hr>
+        
+        <div id="profile-edit-zone" class="hidden">
+            <span style="font-size: 11px; color: var(--text-secondary); display:block; margin-bottom:8px; text-align:center;">Edit Profil Akun</span>
+            <div class="profile-uploader-wrapper">
+                <img id="settings-avatar-preview" src="" alt="Avatar">
+                <button class="btn-change-avatar" onclick="document.getElementById('avatarFile').click()">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="updateProfilePicture(event)">
+            </div>
+            
+            <div class="name-edit-group">
+                <input type="text" id="editDisplayName" placeholder="Masukkan nama barumu...">
+                <button onclick="updateDisplayName()" title="Simpan Nama"><i class="fas fa-save"></i></button>
+            </div>
+            <hr>
+        </div>
+
         <div class="setting-item">
             <span data-key="themeLabel">Tema Tampilan</span>
             <button class="toggle-control" onclick="toggleTheme()" id="themeBtn">🌓 Dark</button>
@@ -81,7 +99,7 @@
                 </div>
                 <div class="comment-input-area hidden" id="commentInputArea">
                     <textarea id="commentText" placeholder="Berikan feedback atau tanyakan sesuatu tentang addon..."></textarea>
-                    <button class="btn-primary" onclick="sendComment()"><i class="fas fa-paper-plane"></i> <span data-key="sendComment">Kirim</span></button>
+                    <button class="btn-primary" id="submitCommentBtn" onclick="sendComment()"><i class="fas fa-paper-plane"></i> <span data-key="sendComment">Kirim</span></button>
                 </div>
             </div>
 
