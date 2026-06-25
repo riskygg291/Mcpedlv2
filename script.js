@@ -52,7 +52,7 @@ const languages = {
     }
 };
 
-// --- APP STATE (Lengkap dengan LocalStorage) ---
+// --- APP STATE (LocalStorage) ---
 let currentLang = localStorage.getItem('mcpedl_lang') || 'id';
 let profile = JSON.parse(localStorage.getItem('mcpedl_profile')) || {
     username: "AMBATUKAN",
@@ -74,12 +74,10 @@ let addons = JSON.parse(localStorage.getItem('mcpedl_addons')) || [
     }
 ];
 
-// File base64 buffer temporary storage
 let tempAddonImg = "";
 
 // --- INITIALIZE & LOADING ---
 window.addEventListener('DOMContentLoaded', () => {
-    // Jalankan Simulasi Loading selama 2 Detik (2000ms)
     setTimeout(() => {
         const loadingScreen = document.getElementById('loading-screen');
         const mainApp = document.getElementById('main-app');
@@ -136,7 +134,6 @@ function saveData() {
     localStorage.setItem('mcpedl_addons', JSON.stringify(addons));
 }
 
-// --- NOTIFICATION ---
 function showToast(msg) {
     const toast = document.getElementById('toast');
     document.getElementById('toast-msg').textContent = msg;
@@ -154,13 +151,11 @@ function renderAddons() {
     const t = languages[currentLang];
 
     addons.forEach(addon => {
-        // Calculate average star rating
         const avgRating = addon.ratings.length ? (addon.ratings.reduce((a,b) => a+b, 0) / addon.ratings.length).toFixed(1) : "0.0";
         
         const card = document.createElement('div');
         card.className = "bg-slate-900/60 backdrop-blur-md rounded-2xl overflow-hidden border border-slate-800 flex flex-col group cursor-pointer transition-all duration-300 hover:-translate-y-1 addon-card-glow";
         card.onclick = (e) => {
-            // Prevent trigger modal when clicking action button inside card
             if(!e.target.closest('.action-btn')) openDetailModal(addon.id);
         };
 
@@ -195,7 +190,6 @@ function renderAddons() {
     });
 }
 
-// --- ACTIONS & FEATURES ---
 function copyLink(link) {
     navigator.clipboard.writeText(link).then(() => {
         showToast(languages[currentLang].copySuccess);
@@ -209,9 +203,7 @@ function deleteAddon(id) {
     showToast(languages[currentLang].toastDel);
 }
 
-// --- EVENT LISTENERS HANDLING ---
 function setupEventListeners() {
-    // Language Switcher
     document.getElementById('lang-select').addEventListener('change', (e) => {
         currentLang = e.target.value;
         saveData();
@@ -219,19 +211,17 @@ function setupEventListeners() {
         renderAddons();
     });
 
-    // Profile Username Edit Inline
     document.getElementById('username-input').addEventListener('blur', (e) => {
         let newName = e.target.value.trim();
         if(newName) {
             profile.username = newName;
             saveData();
             loadProfileUI();
-            renderAddons(); // Update deletion capabilities inside view state
+            renderAddons();
             showToast(languages[currentLang].toastProfile);
         }
     });
 
-    // Profile Avatar Change From Device
     document.getElementById('avatar-input').addEventListener('change', function() {
         const file = this.files[0];
         if (file) {
@@ -246,7 +236,6 @@ function setupEventListeners() {
         }
     });
 
-    // Modal Control: Create Addon
     const createModal = document.getElementById('create-modal');
     const createCard = document.getElementById('create-modal-card');
     
@@ -267,7 +256,6 @@ function setupEventListeners() {
     
     document.getElementById('close-create-modal').onclick = hideCreateModal;
 
-    // Process uploaded file for new addon
     document.getElementById('addon-img-input').addEventListener('change', function() {
         const file = this.files[0];
         if (file) {
@@ -280,7 +268,6 @@ function setupEventListeners() {
         }
     });
 
-    // Handle Form Submit (Create Addon)
     document.getElementById('addon-form').onsubmit = (e) => {
         e.preventDefault();
         
@@ -303,7 +290,7 @@ function setupEventListeners() {
     };
 }
 
-// --- DETAIL MODAL & INTERACTION LAB ---
+// --- DETAIL MODAL & INTERACTION LAB (FIXED FOR MOBILE SCROLL AND TAP OUTSIDE) ---
 function openDetailModal(id) {
     const addon = addons.find(item => item.id === id);
     if (!addon) return;
@@ -316,15 +303,23 @@ function openDetailModal(id) {
     document.body.classList.add('overflow-hidden');
     setTimeout(() => card.classList.add('modal-active'), 10);
 
-    window.activeDetailAddonId = id; // Store temporary global references
+    window.activeDetailAddonId = id;
     renderDetailContent(addon, t);
 
-    document.getElementById('close-detail-modal').onclick = () => {
+    const closeModalFn = () => {
         card.classList.remove('modal-active');
         setTimeout(() => {
             modal.classList.add('hidden');
             document.body.classList.remove('overflow-hidden');
         }, 300);
+    };
+
+    document.getElementById('close-detail-modal').onclick = closeModalFn;
+
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            closeModalFn();
+        }
     };
 }
 
@@ -332,7 +327,6 @@ function renderDetailContent(addon, t) {
     const container = document.getElementById('detail-content');
     const avgRating = addon.ratings.length ? (addon.ratings.reduce((a,b) => a+b, 0) / addon.ratings.length).toFixed(1) : "0.0";
 
-    // Comments Layout HTML
     let commentsHTML = "";
     if(addon.comments.length === 0) {
         commentsHTML = `<p class="text-slate-500 text-sm italic text-center py-4">${t.noComment}</p>`;
@@ -410,7 +404,6 @@ function renderDetailContent(addon, t) {
         </div>
     `;
 
-    // Internal dynamic rating star selectors logic
     window.selectedRatingVal = 5;
     const stars = container.querySelectorAll('.star-btn');
     stars.forEach(s => {
@@ -435,7 +428,6 @@ function submitReview() {
 
     const addon = addons.find(item => item.id === window.activeDetailAddonId);
     if(addon) {
-        // Push payload to storage array
         addon.ratings.push(window.selectedRatingVal);
         addon.comments.unshift({
             user: profile.username,
